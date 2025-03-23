@@ -87,6 +87,37 @@ exports.ValidationAttendance = (req, res) => {
   };
 
 
+  exports.punchInOutTime = (req, res) => {
+    attendancemodel.punchInOutTime(req,(data) => {
+  
+      // console.log('dashboardmodel -------', data);
+      res.send(data);
+    });
+  
+  
+  };
+
+  exports.shiftDetails = (req, res) => {
+    attendancemodel.shiftDetails(req,(data) => {
+  
+      // console.log('dashboardmodel -------', data);
+      res.send(data);
+    });
+  
+  
+  };
+
+  exports.HolidayList = (req, res) => {
+    attendancemodel.HolidayList(req,(data) => {
+  
+      // console.log('dashboardmodel -------', data);
+      res.send(data);
+    });
+  
+  
+  };
+
+
 
   exports.leave_history = (req, res) => {
     attendancemodel.leave_history(req,(data) => {

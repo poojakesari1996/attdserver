@@ -73,6 +73,7 @@ auth.login = (req, result) => {
     em.role,
     em.emp_type,
     em.division,
+    em.zone_id,
     em.status,
     em.address, 
     em.reporting_to,
@@ -82,6 +83,7 @@ auth.login = (req, result) => {
     dev.division_name,
     dev.status AS division_status,
     em.city_id,
+    em.sg_code,
     em.department_id,
     em.deleted_at
   FROM ((crm_dev_db.cor_emp_m em

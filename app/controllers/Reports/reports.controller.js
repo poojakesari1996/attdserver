@@ -19,6 +19,171 @@ exports.SelectOutlet_OrderHistory = (req, res) => {
 
 };
 
+// exports.listLeaves = (req, res) => {
+//   reportsModel.listLeaves(req,(data) => {
+//   console.log('listAuth -------', data);
+//   res.send(data);
+// });
+
+
+// };
+
+
+exports.LastTwovisit_OrderHistory = (req, res) => {
+  reportsModel.LastTwovisit_OrderHistory(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+
+exports.Leaveapproval = (req, res) => {
+  reportsModel.Leaveapproval(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+exports.Leaveapprovallist = (req, res) => {
+  reportsModel.Leaveapprovallist(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+exports.Leaveidapproval = (req, res) => {
+  reportsModel.Leaveidapproval(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+
+exports.LeaveidRejection = (req, res) => {
+  reportsModel.LeaveidRejection(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+exports.Leaverejectedlist = (req, res) => {
+  reportsModel.Leaverejectedlist(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+exports.Leavestatuslist = (req, res) => {
+  reportsModel.Leavestatuslist(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+};
+
+exports.Eodfetch = (req, res) => {
+  reportsModel.Eodfetch(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+exports.getAttendanceHistory = (req, res) => {
+  reportsModel.getAttendanceHistory(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+exports.getOrdersAndActivitiesByDate = (req, res) => {
+  reportsModel.getOrdersAndActivitiesByDate(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+exports.ManagerTeam = (req, res) => {
+  reportsModel.ManagerTeam(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+exports.attendance_regulization = (req, res) => {
+  reportsModel.attendance_regulization(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+exports.getPendingRegularizations = (req, res) => {
+  reportsModel.getPendingRegularizations(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+exports.Regulizationidapproval = (req, res) => {
+  reportsModel.Regulizationidapproval(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+exports.Regulizationidrejected = (req, res) => {
+  reportsModel.Regulizationidrejected(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+exports.RejectedRegularizationList = (req, res) => {
+  reportsModel.RejectedRegularizationList(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+exports.ApprovedRegularizationList = (req, res) => {
+  reportsModel.ApprovedRegularizationList(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+
 exports.OrderHistory_MIS = (req, res) => {
     reportsModel.OrderHistory_MIS(req,(data) => {
     console.log('listAuth -------', data);
@@ -62,6 +227,16 @@ exports.AttendanceHistory = (req, res) => {
     console.log('listAuth -------', data);
     res.send(data);
   });
+
+
+};
+
+
+exports.monthlyAttendance = (req, res) => {
+  reportsModel.monthlyAttendance(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
 
 
 };
@@ -132,6 +307,16 @@ exports.EODActivityDate = (req, res) => {
 
 exports.EODAttendance = (req, res) => {
   reportsModel.EODAttendance(req,(data) => {
+  console.log('listAuth -------', data);
+  res.send(data);
+});
+
+
+};
+
+
+exports.Teamlink = (req, res) => {
+  reportsModel.Teamlink(req,(data) => {
   console.log('listAuth -------', data);
   res.send(data);
 });

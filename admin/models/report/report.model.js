@@ -314,6 +314,115 @@ const countTotalRows = (query) => {
 *@Description:      <List listAttendanceReport>
 */
 
+// report.listAttendanceReport = (req, result) => {
+//   var moment = require('moment');
+//   const page = req.query.page || 1;
+//   const perPage = req.query.filter_items_per_page ? req.query.filter_items_per_page : 500;
+//   const punchDate = req.query.punch_date || moment().format("YYYY-MM-DD"); // Use a specific date
+
+//   const start = ((page - 1) * perPage);
+//   const search = req.query.search || "";
+
+//   var user = JSON.parse(req.headers.authorization);
+//   console.log(user);
+
+//   var querySearch = '';
+//   var queryWhere = `WHERE em.deleted_at IS NULL AND punch_date = '${punchDate}'`;
+// // var queryWhere = `WHERE em.deleted_at IS NULL`;
+//   if (search) {
+//     columnSearch = [
+//       'a.emp_id',
+//       'em.user_name',
+//       'em.emp_code',
+//       'd.designation_name'
+//     ];
+//     columnSearch.forEach(item => {
+//       querySearch += `${item} LIKE '%${search}%' OR `;
+//     });
+
+//     if (querySearch) {
+//       querySearch = `(${querySearch.slice(0, -4)})`;
+//     }
+//   }
+
+//   if (querySearch) {
+//     queryWhere += ` AND ${querySearch} `;
+//   }
+
+//   if (user.role != 1) {
+//     queryWhere += ` AND em.emp_id IN (
+//       WITH RECURSIVE subordinate AS (
+//         SELECT emp_id, emp_code, reporting_to, 0 AS level
+//         FROM cor_emp_m
+//         WHERE api_token = '${user.api_token}'
+//         UNION ALL
+//         SELECT e.emp_id, e.emp_code, e.reporting_to, level + 1
+//         FROM cor_emp_m e
+//         JOIN subordinate s ON e.reporting_to = s.emp_id
+//       )
+//       SELECT s.emp_id
+//       FROM subordinate s
+//       JOIN cor_emp_m m ON s.reporting_to = m.emp_id
+//       ORDER BY level
+//     )`;
+//   }
+
+//   var query = '';
+//   query += `GROUP_CONCAT(if(punch_date = '${punchDate}', CASE WHEN a.status = 1 THEN 'P' WHEN holiday_status = 2 THEN 'W' WHEN holiday_status = 1 THEN 'H' WHEN leave_status = 2 THEN 'L' ELSE 'N/A' END, null)) AS 'attendance_date'`;
+
+//   console.log(`SELECT a.emp_id AS id, em.user_name, em.emp_code, d.designation_name,
+//   ${query},
+//   COUNT(if(a.status = 1, 1, null)) AS 'present_days',
+//   COUNT(if(holiday_status = 2, 1, null)) AS 'holidays',
+//   COUNT(if(leave_status = 2, 1, null)) AS 'leaves',
+//   COUNT(if(a.status IS NULL, 1, null)) AS 'absent',
+//   1 AS month_days,  -- For single date, month_days will be 1
+//   SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(a.punch_out, a.punch_in))) AS working_hours
+//   FROM cor_attendance_m AS a
+//   LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
+//   LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
+//   ${queryWhere}
+//   GROUP BY a.emp_id
+//   ORDER BY em.reporting_to ASC
+//   LIMIT ${perPage} OFFSET ${start}`);
+
+//   sql.query(`SELECT a.emp_id AS id, em.user_name, em.emp_code, d.designation_name,
+//   ${query},
+//   COUNT(if(a.status = 1, 1, null)) AS 'present_days',
+//   COUNT(if(holiday_status = 2, 1, null)) AS 'holidays',
+//   COUNT(if(leave_status = 2, 1, null)) AS 'leaves',
+//   COUNT(if(a.status IS NULL, 1, null)) AS 'absent',
+//   1 AS month_days,  -- For single date, month_days will be 1
+//   SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(a.punch_out, a.punch_in))) AS working_hours
+//   FROM cor_attendance_m AS a
+//   LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
+//   LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
+//   ${queryWhere}
+//   GROUP BY a.emp_id
+//   ORDER BY em.reporting_to ASC
+//   LIMIT ${perPage} OFFSET ${start}`,
+  
+//     async (err, res) => {
+//       if (err) {
+//         console.error(err);
+//         result({ total: 0, data: [] });
+//       } else {
+//         const total = await countTotalRows(`
+//           SELECT COUNT(emp_id) AS total FROM (
+//             SELECT a.emp_id
+//             FROM cor_attendance_m AS a
+//             LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
+//             LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
+//             ${queryWhere}
+//             GROUP BY a.emp_id
+//           ) AS a
+//         `);
+//         result(total, helper.checkDataRows(null, res));
+//       }
+//     });
+// };
+
+
 report.listAttendanceReport = (req, result) => {
   var moment = require('moment');
   const page = req.query.page || 1;
@@ -328,7 +437,7 @@ report.listAttendanceReport = (req, result) => {
 
   var querySearch = '';
   var queryWhere = `WHERE em.deleted_at IS NULL AND punch_date = '${punchDate}'`;
-// var queryWhere = `WHERE em.deleted_at IS NULL`;
+  // var queryWhere = `WHERE em.deleted_at IS NULL`;
   if (search) {
     columnSearch = [
       'a.emp_id',
@@ -368,40 +477,49 @@ report.listAttendanceReport = (req, result) => {
   }
 
   var query = '';
-  query += `GROUP_CONCAT(if(punch_date = '${punchDate}', CASE WHEN a.status = 1 THEN 'P' WHEN holiday_status = 2 THEN 'W' WHEN holiday_status = 1 THEN 'H' WHEN leave_status = 2 THEN 'L' ELSE 'N/A' END, null)) AS 'attendance_date'`;
+  query += `GROUP_CONCAT(
+    if(punch_date = '${punchDate}', 
+      CASE 
+        WHEN a.status = 1 AND a.punch_out IS NOT NULL THEN 'P'  -- Present only if both punch_in and punch_out exist
+        WHEN a.punch_in IS NOT NULL AND a.punch_out IS NULL THEN 'A'  -- Absent if punch_in exists but no punch_out
+        WHEN holiday_status = 2 THEN 'W' 
+        WHEN holiday_status = 1 THEN 'H' 
+        WHEN leave_status = 2 THEN 'L' 
+        ELSE 'N/A' 
+      END, null)) AS 'attendance_date'`;
 
   console.log(`SELECT a.emp_id AS id, em.user_name, em.emp_code, d.designation_name,
-  ${query},
-  COUNT(if(a.status = 1, 1, null)) AS 'present_days',
-  COUNT(if(holiday_status = 2, 1, null)) AS 'holidays',
-  COUNT(if(leave_status = 2, 1, null)) AS 'leaves',
-  COUNT(if(a.status IS NULL, 1, null)) AS 'absent',
-  1 AS month_days,  -- For single date, month_days will be 1
-  SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(a.punch_out, a.punch_in))) AS working_hours
-  FROM cor_attendance_m AS a
-  LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
-  LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
-  ${queryWhere}
-  GROUP BY a.emp_id
-  ORDER BY em.reporting_to ASC
-  LIMIT ${perPage} OFFSET ${start}`);
+    ${query},
+    COUNT(if(a.status = 1 AND a.punch_out IS NOT NULL, 1, null)) AS 'present_days',  -- Only count as present if punch_out exists
+    COUNT(if(holiday_status = 2, 1, null)) AS 'holidays',
+    COUNT(if(leave_status = 2, 1, null)) AS 'leaves',
+    COUNT(if(a.status IS NULL OR a.punch_out IS NULL, 1, null)) AS 'absent',  -- Mark as absent if punch_out is NULL
+    1 AS month_days,  -- For single date, month_days will be 1
+    SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(a.punch_out, a.punch_in))) AS working_hours
+    FROM cor_attendance_m AS a
+    LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
+    LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
+    ${queryWhere}
+    GROUP BY a.emp_id
+    ORDER BY em.reporting_to ASC
+    LIMIT ${perPage} OFFSET ${start}`);
 
   sql.query(`SELECT a.emp_id AS id, em.user_name, em.emp_code, d.designation_name,
-  ${query},
-  COUNT(if(a.status = 1, 1, null)) AS 'present_days',
-  COUNT(if(holiday_status = 2, 1, null)) AS 'holidays',
-  COUNT(if(leave_status = 2, 1, null)) AS 'leaves',
-  COUNT(if(a.status IS NULL, 1, null)) AS 'absent',
-  1 AS month_days,  -- For single date, month_days will be 1
-  SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(a.punch_out, a.punch_in))) AS working_hours
-  FROM cor_attendance_m AS a
-  LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
-  LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
-  ${queryWhere}
-  GROUP BY a.emp_id
-  ORDER BY em.reporting_to ASC
-  LIMIT ${perPage} OFFSET ${start}`,
-  
+    ${query},
+    COUNT(if(a.status = 1 AND a.punch_out IS NOT NULL, 1, null)) AS 'present_days',  -- Only count as present if punch_out exists
+    COUNT(if(holiday_status = 2, 1, null)) AS 'holidays',
+    COUNT(if(leave_status = 2, 1, null)) AS 'leaves',
+    COUNT(if(a.status IS NULL OR a.punch_out IS NULL, 1, null)) AS 'absent',  -- Mark as absent if punch_out is NULL
+    1 AS month_days,  -- For single date, month_days will be 1
+    SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(a.punch_out, a.punch_in))) AS working_hours
+    FROM cor_attendance_m AS a
+    LEFT JOIN cor_emp_m AS em ON a.emp_id = em.emp_id
+    LEFT JOIN cor_designation_m AS d ON em.designation = d.designation_id
+    ${queryWhere}
+    GROUP BY a.emp_id
+    ORDER BY em.reporting_to ASC
+    LIMIT ${perPage} OFFSET ${start}`,
+    
     async (err, res) => {
       if (err) {
         console.error(err);
@@ -421,6 +539,7 @@ report.listAttendanceReport = (req, result) => {
       }
     });
 };
+
 
 
 

@@ -12,9 +12,12 @@ module.exports = app => {
     router.post("/attendance_punchout", Attendance.attendance_punchout);
     router.post("/LeaveApp", Attendance.LeaveApp);
     router.post("/LeaveCount", Attendance.LeaveCount);
+    router.post("/punchInOutTime", Attendance.punchInOutTime);
+    router.post("/shiftDetails", Attendance.shiftDetails);
     router.get("/attendance_count", Attendance.attandance_count);
     router.get("/attendance_summary", Attendance.attandance_summary);
     router.get("/leave_type", Attendance.LeaveType);
+    router.post("/HolidayList", Attendance.HolidayList);
     router.get("/leave_history", Attendance.leave_history);
 
    

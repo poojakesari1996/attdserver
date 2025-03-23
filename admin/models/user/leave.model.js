@@ -26,9 +26,7 @@ leave.listLeaves = (req, result) => {
   const search = req.query.search || "";
 
 
-  // var querySearch = '';
-  // var queryWhere = '';
-  // var total = 0;
+  
 
   var user = JSON.parse(req.headers.authorization)
 
@@ -97,9 +95,7 @@ leave.listLeaves = (req, result) => {
 
   queryWhere += ` ORDER BY ${sort}  ${order}`
 
-  // LEFT JOIN cor_role_m AS r ON e.role = r.role_id
-  //LEFT JOIN cor_designation_m AS ds  ON e.designation = ds.designation_id
-  //LEFT JOIN cor_division_m AS dv ON e.division = dv.division_id
+  
   sql.query(`select l.id,l.status,l.leave_type,l.start_date,l.end_date,l.leave_days,l.leave_reason,
              l.emp_id,emp_appr.user_name AS approval_name,l.approved_by,l.approved_date, e.user_name,e.email,e.phone_number,e.Head_Quater_name AS head_quater_name,
              rp.emp_id AS reporting_id, rp.user_name AS reporting_name from cor_leave_m AS l

@@ -21,9 +21,9 @@ const skuorder = function(osbs) {
 
 skuorder.skulist =  (req, result) => {
     sql.query( `SELECT sku.sku_id,sku.sku_name,sku.sku_price,sku.sku_gst,seg.segment_code,sku.sku_gst,divs.division_name, 0 total
-    FROM romsondb.cor_sku_m AS sku
-    LEFT JOIN romsondb.cor_segment_m AS seg ON sku.segment_id = seg.segment_id
-    LEFT JOIN romsondb.cor_division_m AS divs ON sku.division_id = divs.division_id
+    FROM crm_dev_db.cor_sku_m AS sku
+    LEFT JOIN crm_dev_db.cor_segment_m AS seg ON sku.segment_id = seg.segment_id
+    LEFT JOIN crm_dev_db.cor_division_m AS divs ON sku.division_id = divs.division_id
     where sku.division_id = '${req.body.division}'`,
      (err, res) => {
       console.log("osbss: ", res);
@@ -68,18 +68,20 @@ skuorder.skulist =  (req, result) => {
 
 skuorder.orderfilleds =  async(req, results) => {
 
-    const TaskAuto = await OrderAutoNo();
-    console.log(TaskAuto,"TaskAuto");
+    const TaskAuto = await OrderAutoNo();  
 
-    let detailQry = `INSERT INTO  romsondb.cor_order_d (order_id, item_id, item_qty,item_price_unit,item_gst,enter_by,enter_date,order_amt,order_gst_amt,item_value,item_discount)
+    let detailQry = `INSERT INTO  crm_dev_db.cor_order_d (order_id, item_id, item_qty,item_price_unit,item_gst,enter_by,enter_date,order_amt,order_gst_amt,item_value,item_discount)
     VALUES`;
   
-    let querry = `INSERT INTO romsondb.cor_order_m (
+    let querry = `INSERT INTO crm_dev_db.cor_order_m (
       order_id, 
       order_date, 
       order_time,
       outlet_id,
       phone_no,
+      joined_call_id,
+      joined_name,
+      call_type,
       employee_id,
       enter_by,
       enter_date,
@@ -93,11 +95,14 @@ skuorder.orderfilleds =  async(req, results) => {
       dealer_id,
       reporting_to_user_id,
       beat_id
-      ) VALUES (${TaskAuto[0]["romsondb.all_auto_no(44)"]},
+      ) VALUES (${TaskAuto[0]["crm_dev_db.all_auto_no(44)"]},
       curdate(),
       sysdate(),
       '${req.body.outletID}',
       '${req.body.pnumber}',
+      '${req.body.joinedid}',
+      '${req.body.joinedName}',
+      '${req.body.callType}',
       '${req.body.employeeID}',
       '${req.body.enterBy}',
       sysdate(),
@@ -112,14 +117,12 @@ skuorder.orderfilleds =  async(req, results) => {
       '${req.body.reporting_to_user_id}',
       '${req.body.beat_id}'
       );`
-  
-    // console.log(detailQry,"///////////////");
-    console.log(querry, "..............");
+
   
 
     sql.query( querry, (err, result) => {
         req.body.detail.map((res, index) => {
-          detailQry += `(${TaskAuto[0]["romsondb.all_auto_no(44)"]},
+          detailQry += `(${TaskAuto[0]["crm_dev_db.all_auto_no(44)"]},
           '${res.sku_id}','${res.itemvalue}','${res.sku_price}',
           '${res.sku_gst}','${req.body.enterBy}',sysdate(),${res.itemvalue}*${res.sku_price},
           (${res.itemvalue}*${res.sku_price}*${res.sku_gst})/100,
@@ -127,19 +130,19 @@ skuorder.orderfilleds =  async(req, results) => {
           '${req.body.item_discount}')`;
     
           if (index < req.body.detail.length - 1) {
-            detailQry += ",";
+            detailQry += ",";   
           }
         });
-        console.log(querry,"querryquerry");
+
         setTimeout(() => {
             sql.query(detailQry, (err, resp) => {
-            // console.log(result, resp);
+            console.log(result, resp);
             results({ result, resp});
           });
         }, 2000);
     
         //    res.send(result);
-        // console.log(result);
+       // console.log(querry);
       });
     };
 
@@ -150,10 +153,10 @@ skuorder.orderfilleds =  async(req, results) => {
       const ReturnAuto = await ReturnAutoNo();
       console.log(ReturnAuto,"ReturnAuto");
 
-      let detailQry = `INSERT INTO  romsondb.cor_order_return_d (order_return_id, item_id, item_qty,item_price_unit,item_gst,order_return_reason,enter_by,enter_date,return_order_amt,return_order_gst_amt,item_value)
+      let detailQry = `INSERT INTO  crm_dev_db.cor_order_return_d (order_return_id, item_id, item_qty,item_price_unit,item_gst,order_return_reason,enter_by,enter_date,return_order_amt,return_order_gst_amt,item_value)
       VALUES`;
     
-      let querry = `INSERT INTO romsondb.cor_order_return_m (
+      let querry = `INSERT INTO crm_dev_db.cor_order_return_m (
         order_return_id, 
         order_return__date, 
         order_return_time,
@@ -172,7 +175,7 @@ skuorder.orderfilleds =  async(req, results) => {
         dealer_id,
         reporting_to_user_id,
         beat_id
-        ) VALUES (${ReturnAuto[0]["romsondb.all_auto_no(77)"]},
+        ) VALUES (${ReturnAuto[0]["crm_dev_db.all_auto_no(77)"]},
         curdate(),
         sysdate(),
         '${req.body.outletID}',
@@ -198,7 +201,7 @@ skuorder.orderfilleds =  async(req, results) => {
   
       sql.query( querry, (err, result) => {
         req.body.detail.map((res, index) => {
-          detailQry += `(${ReturnAuto[0]["romsondb.all_auto_no(77)"]},
+          detailQry += `(${ReturnAuto[0]["crm_dev_db.all_auto_no(77)"]},
           '${res.itemId}','${res.value}','${res.price}','${res.itmgst}',
             '${res.ITM}','${req.body.enterBy}',sysdate(),
             ${res.value}*${res.price},
@@ -242,9 +245,9 @@ skuorder.orderfilleds =  async(req, results) => {
 
     skuorder.skulisthospital =  (req, result) => {
       sql.query( `SELECT sku.sku_id,sku.sku_name,sku.sku_price,sku.sku_gst,seg.segment_code,sku.sku_gst,divs.division_name, 0 total
-      FROM romsondb.cor_sku_m AS sku
-      LEFT JOIN romsondb.cor_segment_m AS seg ON sku.segment_id = seg.segment_id
-      LEFT JOIN romsondb.cor_division_m AS divs ON sku.division_id = divs.division_id
+      FROM crm_dev_db.cor_sku_m AS sku
+      LEFT JOIN crm_dev_db.cor_segment_m AS seg ON sku.segment_id = seg.segment_id
+      LEFT JOIN crm_dev_db.cor_division_m AS divs ON sku.division_id = divs.division_id
       where sku.division_id = '${req.body.division}'`,
        (err, res) => {
         console.log("osbss: ", res);
@@ -258,20 +261,22 @@ skuorder.orderfilleds =  async(req, results) => {
 
     skuorder.ActivityHospital =  async(req, results) => {
 
+      console.log(req.body,"line 262");
+
       const ActivityAuto = await ActivityAutoNO();
       console.log(ActivityAuto,"ReturnAuto");
 
-      let detailQry = `INSERT INTO romsondb.cor_outlet_activity_m (activity_id,outlet_id, item_id, enter_by,user_type,remark,follow_up,enter_date,hospital_customer_name,hospital_name,activity_date,zone_id,division_m,act_lat,act_long)
+      let detailQry = `INSERT INTO crm_dev_db.cor_outlet_activity_m (activity_id,outlet_id, item_id, enter_by,user_type,remark,follow_up,enter_date,hospital_customer_name,hospital_name,activity_date,zone_id,division_m,act_lat,act_long, joined_name, call_type,joined_call_id)
       VALUES`;
     
   
       sql.query( detailQry, (err, result) => {
         req.body.activitydetails.map((res, index) => {
-          detailQry += `(${ActivityAuto[0]["romsondb.all_auto_no(66)"]},"${res.Outletid}",
+          detailQry += `(${ActivityAuto[0]["crm_dev_db.all_auto_no(66)"]},"${res.Outletid}",
           "${res.itemId}",
-          "${req.body.enterbyy}","${res.custype}","${res.value}",
-          "${res.ITM}",sysdate(),"${res.customername}","${res.Hosname}",curdate(),"${req.body.zone}",
-          "${req.body.div}","${req.body.lat}","${req.body.lag}")`;
+          "${req.body.enterbyy}","${res.custype}","${res.value}", "${res.followup}",
+          sysdate(),"${res.customername}","${res.Hosname}",curdate(),"${req.body.zone}",
+          "${req.body.div}","${req.body.lat}","${req.body.lag}","${req.body.joinedName}","${req.body.callType}",${req.body.joinedcallid})`;
           if (index < req.body.activitydetails.length - 1) {
             detailQry += ",";
           }
@@ -279,11 +284,11 @@ skuorder.orderfilleds =  async(req, results) => {
         console.log(detailQry, "/./././././");
   
     sql.query(detailQry, (err, resp) => {
-      console.log(result, resp);
+      console.log(result, resp,"Line 285");
       if(err){
         results({error:true,data:"Something Went Wrong"})
       }else{
-        results({ error: false, data: result });
+        results({ error: false, data: "Successfully Submited" });
       }
       
     });
@@ -298,7 +303,7 @@ skuorder.orderfilleds =  async(req, results) => {
     function OrderAutoNo() {
         return new Promise((resolve, reject) => {
             sql.query(
-            `(select romsondb.all_auto_no(44))`,
+            `(select crm_dev_db.all_auto_no(44))`,
             (err, result) => {
               console.log(result);
               resolve(result);
@@ -310,7 +315,7 @@ skuorder.orderfilleds =  async(req, results) => {
       function ReturnAutoNo() {
         return new Promise((resolve, reject) => {
             sql.query(
-            `(select romsondb.all_auto_no(77))`,
+            `(select crm_dev_db.all_auto_no(77))`,
             (err, result) => {
               console.log(result);
               resolve(result);
@@ -322,7 +327,7 @@ skuorder.orderfilleds =  async(req, results) => {
       function ActivityAutoNO() {
         return new Promise((resolve, reject) => {
             sql.query(
-            `(select romsondb.all_auto_no(66))`,
+            `(select crm_dev_db.all_auto_no(66))`,
             (err, result) => {
               console.log(result);
               resolve(result);
