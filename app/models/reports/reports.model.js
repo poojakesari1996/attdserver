@@ -761,7 +761,7 @@ reports.EodReturnbutton = (req, result) => {
 
 ////////////////////////
 reports.ActivityData = (req, result) => {
-  sql.query(`SELECT act.id,itm.sku_name,act.outlet_id,act.item_id,act.enter_by,act.user_type,act.remark,    act.follow_up,act.enter_date,act.hospital_customer_name,act.hospital_name,act.activity_date,act.zone_id,act.division_m,itm.sku_name
+  sql.query(`SELECT act.id,itm.sku_name,act.outlet_id,act.item_id,act.enter_by,act.user_type,act.remark,act.call_type, act.joined_name,act.follow_up,act.enter_date,act.hospital_customer_name,act.hospital_name,act.activity_date,act.zone_id,act.division_m,itm.sku_name
     FROM crm_dev_db.cor_outlet_activity_m act
     LEFT JOIN crm_dev_db.cor_sku_m itm ON act.item_id = itm.sku_id
     where  DATE(act.activity_date) = CURDATE() and act.enter_by = '${req.body.enterBy}'`, (err, res) => {
@@ -775,7 +775,7 @@ reports.ActivityData = (req, result) => {
 /////////////button click
 
 reports.ActivityDatabutton = (req, result) => {
-  sql.query(`SELECT act.id,act.outlet_id,act.item_id,act.enter_by,act.user_type,act.remark,
+  sql.query(`SELECT act.id,act.outlet_id,act.item_id,act.enter_by,act.user_type,act.remark,act.call_type, act.joined_name,
 act.follow_up,act.enter_date,act.hospital_customer_name,act.hospital_name,act.activity_date,act.zone_id,act.division_m,itm.sku_name
      FROM crm_dev_db.cor_outlet_activity_m act , crm_dev_db.cor_sku_m itm  where act.item_id=itm.sku_id and act.activity_date = '${req.body.enterDate}' and act.enter_by = '${req.body.enterBy}'`, (err, res) => {
     console.log("osbss: ", res);

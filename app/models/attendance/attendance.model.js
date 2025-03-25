@@ -936,19 +936,44 @@ WHEN a.leave_status = 2 THEN 'L' -- Leave applied
 
 
 
+// attendance.punchInOutTime = (req, result) => {
+//   sql.query(`
+//     SELECT 
+//     DATE_FORMAT(CONVERT_TZ(punch_in, '+00:00', '+05:30'), '%h:%i %p') AS punch_in,
+//     DATE_FORMAT(CONVERT_TZ(punch_out, '+00:00', '+05:30'), '%h:%i %p') AS punch_out
+// FROM crm_dev_db.cor_attendance_m 
+// WHERE emp_id = '${req.body.empidd}' 
+// AND (
+//     DATE(CONVERT_TZ(punch_in, '+00:00', '+05:30')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+05:30'))
+//     OR DATE(CONVERT_TZ(punch_out, '+00:00', '+05:30')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+05:30'))
+// );
+
+  
+//   `, (err, res) => {
+    
+//     console.log("Result Data: ", res);
+
+//     if (err) {
+//       result({ error: true, data: "Something Went Wrong" });
+//     } else {
+//       result({ error: false, data: res });
+//     }
+//   });
+// };
+
+
 attendance.punchInOutTime = (req, result) => {
   sql.query(`
     SELECT 
-    DATE_FORMAT(CONVERT_TZ(punch_in, '+00:00', '+05:30'), '%h:%i %p') AS punch_in,
-    DATE_FORMAT(CONVERT_TZ(punch_out, '+00:00', '+05:30'), '%h:%i %p') AS punch_out
-FROM crm_dev_db.cor_attendance_m 
-WHERE emp_id = '${req.body.empidd}' 
-AND (
-    DATE(CONVERT_TZ(punch_in, '+00:00', '+05:30')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+05:30'))
-    OR DATE(CONVERT_TZ(punch_out, '+00:00', '+05:30')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+05:30'))
-);
-
-  
+      DATE_FORMAT(CONVERT_TZ(punch_in, '+00:00', '+05:30'), '%h:%i %p') AS punch_in,
+      DATE_FORMAT(CONVERT_TZ(punch_out, '+00:00', '+05:30'), '%h:%i %p') AS punch_out,
+      TIMESTAMPDIFF(HOUR, punch_in, punch_out) AS total_hours
+    FROM crm_dev_db.cor_attendance_m 
+    WHERE emp_id = '${req.body.empidd}' 
+    AND (
+      DATE(CONVERT_TZ(punch_in, '+00:00', '+05:30')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+05:30'))
+      OR DATE(CONVERT_TZ(punch_out, '+00:00', '+05:30')) = DATE(CONVERT_TZ(NOW(), '+00:00', '+05:30'))
+    );
   `, (err, res) => {
     
     console.log("Result Data: ", res);
@@ -960,8 +985,6 @@ AND (
     }
   });
 };
-
-
 
 
 
