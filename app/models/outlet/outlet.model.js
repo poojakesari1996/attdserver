@@ -108,12 +108,12 @@ outlet.DatewiseOutlet_data = (req, result) => {
     END AS icon_color,
     -- Check if an order exists for the outlet_id on the given date
     CASE 
-        WHEN COUNT(ord.outlet_id) > 0 THEN 'Red' 
+        WHEN COUNT(ord.outlet_id) > 0 THEN 'Green' 
         ELSE NULL 
     END AS order_status,
     -- Check if an activity exists for the outlet_id on the given date
     CASE 
-        WHEN COUNT(act.outlet_id) > 0 THEN 'Blue' 
+        WHEN COUNT(act.outlet_id) > 0 THEN 'Green' 
         ELSE NULL 
     END AS activity_status
 FROM 

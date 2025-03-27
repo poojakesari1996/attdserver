@@ -97,13 +97,14 @@ reports.LastTwovisit_OrderHistory = (req, result) => {
         JOIN crm_dev_db.cor_order_d d ON m.order_id = d.order_id
         JOIN crm_dev_db.cor_sku_m itm ON d.item_id = itm.sku_id
         JOIN crm_dev_db.cor_outlet_m outlet ON m.outlet_id = outlet.outlet_id
-    WHERE 
-        (m.outlet_id, m.enter_date) IN (
-            SELECT outlet_id, MAX(enter_date) 
-            FROM crm_dev_db.cor_order_m 
-            WHERE outlet_id = '${req.body.Outletid}' AND enter_by = '${req.body.enterBy}'
-            GROUP BY outlet_id
-        )
+    JOIN (
+        SELECT outlet_id, MAX(DATE(enter_date)) AS last_date
+        FROM crm_dev_db.cor_order_m 
+        WHERE outlet_id = '${req.body.Outletid}' 
+          AND enter_by = '${req.body.enterBy}'
+          AND enter_date < CURDATE()  
+        GROUP BY outlet_id
+    ) last_order ON m.outlet_id = last_order.outlet_id AND DATE(m.enter_date) = last_order.last_date
 )
 UNION ALL
 (
@@ -138,18 +139,16 @@ UNION ALL
         crm_dev_db.cor_outlet_activity_m act
         LEFT JOIN crm_dev_db.cor_sku_m itm ON act.item_id = itm.sku_id
         LEFT JOIN crm_dev_db.cor_outlet_m outlet ON act.outlet_id = outlet.outlet_id
-    WHERE 
-        (act.outlet_id, act.enter_date) IN (
-            SELECT outlet_id, MAX(enter_date) 
-            FROM crm_dev_db.cor_outlet_activity_m 
-            WHERE outlet_id = '${req.body.Outletid}' AND enter_by = '${req.body.enterBy}'
-            GROUP BY outlet_id
-        )
+    JOIN (
+        SELECT outlet_id, MAX(DATE(enter_date)) AS last_date
+        FROM crm_dev_db.cor_outlet_activity_m 
+        WHERE outlet_id = '${req.body.Outletid}' 
+          AND enter_by = '${req.body.enterBy}'
+          AND enter_date < CURDATE()  
+        GROUP BY outlet_id
+    ) last_activity ON act.outlet_id = last_activity.outlet_id AND DATE(act.enter_date) = last_activity.last_date
 )
-ORDER BY 
-    date DESC;
-
-
+ORDER BY date DESC;
     `, (err, res) => {
     console.log("osbss: ", res);
     if (err) {
