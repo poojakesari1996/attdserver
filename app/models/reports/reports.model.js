@@ -98,12 +98,12 @@ reports.LastTwovisit_OrderHistory = (req, result) => {
         JOIN crm_dev_db.cor_sku_m itm ON d.item_id = itm.sku_id
         JOIN crm_dev_db.cor_outlet_m outlet ON m.outlet_id = outlet.outlet_id
     WHERE 
-        m.outlet_id = '${req.body.Outletid}'
-        AND m.enter_by = '${req.body.enterBy}'
-        AND DATE(m.enter_date) BETWEEN CURDATE() - INTERVAL 365 DAY AND CURDATE() - INTERVAL 1 DAY
-    ORDER BY 
-        m.enter_date DESC
-    LIMIT 2
+        (m.outlet_id, m.enter_date) IN (
+            SELECT outlet_id, MAX(enter_date) 
+            FROM crm_dev_db.cor_order_m 
+            WHERE outlet_id = '${req.body.Outletid}' AND enter_by = '${req.body.enterBy}'
+            GROUP BY outlet_id
+        )
 )
 UNION ALL
 (
@@ -126,7 +126,7 @@ UNION ALL
         NULL AS order_gst_amt,
         itm.sku_name,
         NULL AS segment_id,
-        NULL AS outlet_name,
+        COALESCE(outlet.outlet_name, 'N/A') AS outlet_name,
         act.hospital_customer_name,
         act.hospital_name,
         DATE(act.activity_date) AS activity_date, 
@@ -137,15 +137,18 @@ UNION ALL
     FROM 
         crm_dev_db.cor_outlet_activity_m act
         LEFT JOIN crm_dev_db.cor_sku_m itm ON act.item_id = itm.sku_id
+        LEFT JOIN crm_dev_db.cor_outlet_m outlet ON act.outlet_id = outlet.outlet_id
     WHERE 
-        act.outlet_id = '${req.body.Outletid}'
-        AND act.enter_by = '${req.body.enterBy}'
-    ORDER BY 
-        act.enter_date DESC
-    LIMIT 2
+        (act.outlet_id, act.enter_date) IN (
+            SELECT outlet_id, MAX(enter_date) 
+            FROM crm_dev_db.cor_outlet_activity_m 
+            WHERE outlet_id = '${req.body.Outletid}' AND enter_by = '${req.body.enterBy}'
+            GROUP BY outlet_id
+        )
 )
 ORDER BY 
     date DESC;
+
 
     `, (err, res) => {
     console.log("osbss: ", res);
